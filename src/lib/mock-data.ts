@@ -35,7 +35,7 @@ export const mockTracks: Track[] = [
     title: 'Only You',
     artist: 'The Platters',
     album: 'Only You',
-    cover: '/cover/only you.png', // Ganti dengan URL gambar album jika ada
+    cover: '/cover/only you.jpg', // Ganti dengan URL gambar album jika ada
     url: '/music/Only You.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
     duration: 159, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
@@ -67,7 +67,7 @@ export const mockTracks: Track[] = [
     title: 'Piano Man',
     artist: 'Billy Joel',
     album: 'Piano Man',
-    cover: '/cover/billy.png', // Ganti dengan URL gambar album jika ada
+    cover: '/cover/billy.jpg', // Ganti dengan URL gambar album jika ada
     url: '/music/Piano Man.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
     duration: 338, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
@@ -77,7 +77,7 @@ export const mockTracks: Track[] = [
     title: 'Uptown Girl',
     artist: 'Billy Joel',
     album: 'Piano Man',
-    cover: '/cover/billy.png', // Ganti dengan URL gambar album jika ada
+    cover: '/cover/billy.jpg', // Ganti dengan URL gambar album jika ada
     url: '/music/Uptown Girl.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
     duration: 196, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
