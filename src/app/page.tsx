@@ -11,10 +11,10 @@ export default function Home() {
           </div>
           <div>
             <h1 className="text-3xl md:text-4xl font-bold font-headline text-foreground">
-              Lossless Audio Player
+              Your Music Library
             </h1>
             <p className="text-muted-foreground">
-              Upload and enjoy your music in high-fidelity.
+              Discover your next favorite track.
             </p>
           </div>
         </header>

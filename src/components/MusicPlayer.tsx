@@ -13,6 +13,7 @@ import { Disc3, AlertTriangle } from "lucide-react";
 import { db, storage, isFirebaseConfigured } from "@/lib/firebase";
 import { collection, getDocs, addDoc, doc, updateDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { mockTracks } from "@/lib/mock-data";
 
 export function MusicPlayer() {
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -29,6 +30,7 @@ export function MusicPlayer() {
 
   useEffect(() => {
     if (!isFirebaseConfigured) {
+      setTracks(mockTracks);
       setIsLoading(false);
       return;
     }
@@ -36,7 +38,10 @@ export function MusicPlayer() {
     const fetchTracks = async () => {
       setIsLoading(true);
       try {
-        if (!db) return;
+        if (!db) {
+          setTracks(mockTracks);
+          return;
+        };
         const tracksCollection = collection(db, "tracks");
         const q = query(tracksCollection, orderBy("createdAt"));
         const querySnapshot = await getDocs(q);
@@ -44,13 +49,19 @@ export function MusicPlayer() {
           id: doc.id,
           ...doc.data(),
         })) as Track[];
-        setTracks(fetchedTracks);
+        
+        if (fetchedTracks.length > 0) {
+          setTracks(fetchedTracks);
+        } else {
+          setTracks(mockTracks);
+        }
       } catch (error) {
         console.error("Error fetching tracks:", error);
+        setTracks(mockTracks);
         toast({
           variant: "destructive",
           title: "Error fetching playlist",
-          description: "Could not load tracks from the cloud.",
+          description: "Could not load tracks from the cloud. Showing local data.",
         });
       } finally {
         setIsLoading(false);
@@ -68,6 +79,12 @@ export function MusicPlayer() {
           description: "Please provide valid Firebase credentials in .env to upload files.",
         });
         return;
+    }
+
+    // When a user uploads for the first time after using mock data, clear the mock data.
+    const isUsingMockData = tracks.some(track => mockTracks.some(mock => mock.id === track.id));
+    if(isUsingMockData) {
+      setTracks([]);
     }
 
     for (const file of files) {
@@ -100,6 +117,7 @@ export function MusicPlayer() {
           fileName: trackData.fileName,
           artist: trackData.artist,
         };
+        
         setTracks((prevTracks) => [...prevTracks, newTrack]);
         
         toast({
@@ -160,6 +178,16 @@ export function MusicPlayer() {
     
     const trackIndex = tracks.findIndex(t => t.id === trackId);
     if (trackIndex === -1) return;
+    
+    // Cannot generate title for mock tracks
+    if (mockTracks.some(mock => mock.id === trackId)) {
+       toast({
+        variant: "destructive",
+        title: "Cannot Generate Title",
+        description: "This is a local track. Please upload it to the cloud first.",
+      });
+      return;
+    }
 
     const trackToUpdate = tracks[trackIndex];
     const originalTitle = trackToUpdate.title;
@@ -203,8 +231,11 @@ export function MusicPlayer() {
     if (audioRef.current && currentTrack) {
       audioRef.current.src = currentTrack.url;
       setProgress(0);
+      if (isPlaying) {
+         audioRef.current.play().catch(e => console.error("Playback error:", e));
+      }
     }
-  }, [currentTrack]);
+  }, [currentTrack, isPlaying]);
   
   useEffect(() => {
     if (audioRef.current) {
@@ -228,28 +259,19 @@ export function MusicPlayer() {
   };
 
   const renderPlaylistContent = () => {
-    if (!isFirebaseConfigured) {
+    if (!isFirebaseConfigured && tracks.length > 0) {
       return (
-        <Card>
-           <CardHeader>
-             <CardTitle className="flex items-center gap-2 text-destructive">
-               <AlertTriangle />
-               Firebase Not Configured
-             </CardTitle>
-           </CardHeader>
-           <CardContent>
-             <p>
-               Cloud features are disabled. Please provide your Firebase project configuration in the <code className="bg-muted px-1 py-0.5 rounded-sm font-mono text-sm">.env</code> file.
-             </p>
-             <p className="mt-2 text-sm text-muted-foreground">
-               After updating the <code className="bg-muted px-1 py-0.5 rounded-sm font-mono text-sm">.env</code> file, you will need to restart the development server.
-             </p>
-           </CardContent>
-         </Card>
+        <PlaylistView
+          tracks={tracks}
+          currentTrackId={currentTrack?.id}
+          isPlaying={isPlaying}
+          onPlayTrack={playTrack}
+          onGenerateTitle={handleGenerateTitle}
+        />
       );
     }
-
-    if (isLoading) {
+    
+    if (isFirebaseConfigured && isLoading) {
       return (
         <Card>
            <CardHeader><CardTitle>My Playlist</CardTitle></CardHeader>
@@ -275,6 +297,7 @@ export function MusicPlayer() {
      );
     }
     
+    // This case will now be rare, only if cloud is configured but empty and mock data fails to load
     return (
      <Card className="bg-card border-dashed">
          <CardContent className="h-full flex flex-col items-center justify-center p-10 text-center">
