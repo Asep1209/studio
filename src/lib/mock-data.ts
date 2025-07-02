@@ -26,14 +26,40 @@ import type { Track } from './types';
  */
 
 export const mockTracks: Track[] = [
-  // <-- Tambahkan data lagu Anda di sini
-  // {
-  //   id: 1,
-  //   title: 'Judul Lagu Anda',
-  //   artist: 'Artis Anda',
-  //   album: 'Album Anda',
-  //   cover: 'https://placehold.co/128x128.png',
-  //   url: '/music/nama-file-lagu-anda.mp3',
-  //   duration: 210,
-  // },
+  {
+    id: 1,
+    title: 'Echoes of Tomorrow',
+    artist: 'Vector Seven',
+    album: 'Cybernetic Dreams',
+    cover: 'https://placehold.co/128x128.png',
+    url: '/music/echoes-of-tomorrow.mp3',
+    duration: 215,
+  },
+  {
+    id: 2,
+    title: 'Midnight Drive',
+    artist: 'Synthwave Rider',
+    album: 'Neon Nights',
+    cover: 'https://placehold.co/128x128.png',
+    url: '/music/midnight-drive.mp3',
+    duration: 180,
+  },
+  {
+    id: 3,
+    title: 'Cosmic Dust',
+    artist: 'Galaxy Runners',
+    album: 'Starlight',
+    cover: 'https://placehold.co/128x128.png',
+    url: '/music/cosmic-dust.mp3',
+    duration: 240,
+  },
+  {
+    id: 4,
+    title: 'Lost in the Grid',
+    artist: 'Digital Nomad',
+    album: 'System Failure',
+    cover: 'https://placehold.co/128x128.png',
+    url: '/music/lost-in-the-grid.mp3',
+    duration: 195,
+  },
 ];
