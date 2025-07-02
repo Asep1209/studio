@@ -13,7 +13,6 @@ import { Disc3, Search } from "lucide-react";
 import { db, storage, isFirebaseConfigured } from "@/lib/firebase";
 import { collection, getDocs, addDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { mockTracks } from "@/lib/mock-data";
 
 export function MusicPlayer() {
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -38,7 +37,7 @@ export function MusicPlayer() {
 
   useEffect(() => {
     if (!isFirebaseConfigured) {
-      setTracks(mockTracks);
+      setTracks([]);
       setIsLoading(false);
       return;
     }
@@ -47,29 +46,23 @@ export function MusicPlayer() {
       setIsLoading(true);
       try {
         if (!db) {
-          setTracks(mockTracks);
-          return;
-        };
+          throw new Error("Firestore not initialized");
+        }
         const tracksCollection = collection(db, "tracks");
-        const q = query(tracksCollection, orderBy("createdAt"));
+        const q = query(tracksCollection, orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
         const fetchedTracks = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
         })) as Track[];
-        
-        if (fetchedTracks.length > 0) {
-          setTracks(fetchedTracks);
-        } else {
-          setTracks(mockTracks);
-        }
+        setTracks(fetchedTracks);
       } catch (error) {
         console.error("Error fetching tracks:", error);
-        setTracks(mockTracks);
+        setTracks([]);
         toast({
           variant: "destructive",
           title: "Error fetching playlist",
-          description: "Could not load tracks from the cloud. Showing local data.",
+          description: "Could not load tracks from the cloud.",
         });
       } finally {
         setIsLoading(false);
@@ -77,7 +70,8 @@ export function MusicPlayer() {
     };
 
     fetchTracks();
-  }, [toast]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleFilesAdded = async (files: File[]) => {
     if (!isFirebaseConfigured || !storage || !db) {
@@ -87,11 +81,6 @@ export function MusicPlayer() {
           description: "Please provide valid Firebase credentials in .env to upload files.",
         });
         return;
-    }
-
-    const isUsingMockData = tracks.some(track => mockTracks.some(mock => mock.id === track.id));
-    if(isUsingMockData) {
-      setTracks([]);
     }
 
     for (const file of files) {
@@ -125,7 +114,7 @@ export function MusicPlayer() {
           artist: trackData.artist,
         };
         
-        setTracks((prevTracks) => [...prevTracks, newTrack]);
+        setTracks((prevTracks) => [newTrack, ...prevTracks]);
         
         toast({
           title: "Upload Complete",
