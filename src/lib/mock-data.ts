@@ -2,30 +2,30 @@ import type { Track } from './types';
 
 /**
  * =========================================
- * PENTING: CARA MENAMBAHKAN LAGU LOKAL ANDA
+ * PENTING: CARA MENDAFTARKAN LAGU ANDA
  * =========================================
  *
- * 1. Buat folder `public` di root project Anda (sejajar dengan folder `src`).
- * 2. Di dalam folder `public`, buat lagi folder bernama `music`.
- * 3. Taruh semua file lagu (misal: my-song.mp3) ke dalam folder `public/music`.
- *
- * 4. Untuk setiap lagu, tambahkan satu objek baru di dalam array `mockTracks` di bawah ini.
+ * 1. Pastikan semua file lagu sudah ada di dalam folder `public/music`.
+ * 2. Hapus atau ganti semua contoh lagu di bawah ini dengan koleksi pribadi Anda.
+ * 3. Untuk setiap lagu, cukup copy-paste salah satu blok di bawah dan isi datanya.
  *
  * CONTOH:
  * Kalau Anda punya lagu `keren.mp3` di folder `public/music`, entri-nya akan seperti ini:
  *
  * {
- *   id: 1,
- *   title: 'Lagu Keren Banget',
- *   artist: 'Nama Artisnya',
- *   album: 'Album Terbaik',
- *   cover: 'https://placehold.co/128x128.png', // Link gambar cover album
- *   url: '/music/keren.mp3', // PENTING: Path harus diawali dengan /music/
- *   duration: 180, // Durasi lagu dalam detik
- * }
+ *   id: 1, // Ganti dengan nomor urut
+ *   title: 'Judul Lagu Keren',
+ *   artist: 'Artisnya Siapa',
+ *   album: 'Nama Albumnya',
+ *   cover: 'https://placehold.co/128x128.png', // Boleh pake ini atau ganti link gambar lain
+ *   url: '/music/keren.mp3', // PENTING: Sesuaikan nama file lagunya
+ *   duration: 180, // Ganti dengan durasi lagu dalam detik (kira-kira juga boleh)
+ * },
+ *
  */
 
 export const mockTracks: Track[] = [
+  // HAPUS ATAU GANTI SEMUA LAGU DI BAWAH INI DENGAN KOLEKSI ANDA
   {
     id: 1,
     title: 'Echoes of Tomorrow',
@@ -62,4 +62,17 @@ export const mockTracks: Track[] = [
     url: '/music/lost-in-the-grid.mp3',
     duration: 195,
   },
+
+  // --- TEMPLATE UNTUK LAGU BARU (COPY-PASTE BLOK INI & EDIT ISINYA) ---
+  /*
+  {
+    id: 5, // <-- GANTI NOMOR ID
+    title: 'GANTI DENGAN JUDUL LAGU',
+    artist: 'GANTI DENGAN NAMA ARTIS',
+    album: 'GANTI DENGAN NAMA ALBUM',
+    cover: 'https://placehold.co/128x128.png',
+    url: '/music/NAMA-FILE-LAGU.mp3', // <-- GANTI NAMA FILE
+    duration: 180, // <-- GANTI DURASI (detik)
+  },
+  */
 ];
