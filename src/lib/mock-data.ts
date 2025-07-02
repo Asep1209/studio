@@ -24,7 +24,7 @@ export const mockTracks: Track[] = [
     title: 'No Surprises',
     artist: 'Radiohead',
     album: 'OK COMPUTER',
-    cover: '/Cover/nospr.png', // Ganti dengan URL gambar album jika ada
+    cover: '/cover/nospr.png', // Ganti dengan URL gambar album jika ada
     url: '/music/No Surprises.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
     duration: 228, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
@@ -35,7 +35,7 @@ export const mockTracks: Track[] = [
     title: 'Let Down',
     artist: 'Radiohead',
     album: 'OK COMPUTER',
-    cover: '/Cover/nospr.png', // Ganti dengan URL gambar album jika ada
+    cover: '/cover/nospr.png', // Ganti dengan URL gambar album jika ada
     url: '/music/Letdown.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
     duration: 299, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
@@ -47,7 +47,7 @@ export const mockTracks: Track[] = [
     title: 'Aku Milikmu',
     artist: 'Dewa 19',
     album: 'Format Masa Depan',
-    cover: '/Cover/Format.jpg', // Ganti dengan URL gambar album jika ada
+    cover: '/cover/Format.jpg', // Ganti dengan URL gambar album jika ada
     url: '/music/Aku milikmu.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
     duration: 332, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
@@ -57,7 +57,7 @@ export const mockTracks: Track[] = [
     title: 'Masihkah Ada',
     artist: 'Dewa 19',
     album: 'Format Masa Depan',
-    cover: '/Cover/Format.jpg', // Ganti dengan URL gambar album jika ada
+    cover: '/cover/Format.jpg', // Ganti dengan URL gambar album jika ada
     url: '/music/Masihkah ada.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
     duration: 227, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
@@ -67,7 +67,7 @@ export const mockTracks: Track[] = [
     title: 'Still Im Sure We Love Again',
     artist: 'Dewa 19',
     album: 'Format Masa Depan',
-    cover: '/Cover/Format.jpg', // Ganti dengan URL gambar album jika ada
+    cover: '/cover/Format.jpg', // Ganti dengan URL gambar album jika ada
     url: '/music/Still im.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
     duration: 236, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
@@ -77,7 +77,7 @@ export const mockTracks: Track[] = [
     title: 'Takkan Ada Cinta yang Lain',
     artist: 'Dewa 19',
     album: 'Format Masa Depan',
-    cover: '/Cover/Format.jpg', // Ganti dengan URL gambar album jika ada
+    cover: '/cover/Format.jpg', // Ganti dengan URL gambar album jika ada
     url: '/music/Takkan ada.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
     duration: 269, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
@@ -88,7 +88,7 @@ export const mockTracks: Track[] = [
     artist: 'GANTI DENGAN NAMA ARTIS',
     album: 'GANTI DENGAN NAMA ALBUM',
     cover: 'https://placehold.co/128x128.png', // Ganti dengan URL gambar album jika ada
-    url: '/music/NAMA-FILE-LAGU.mp3', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    url: '/musi/NAMA-FILE-LAGU.mp3', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
     duration: 180, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
   */
