@@ -9,7 +9,8 @@ import { generateTitleAction } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
-import { Disc3, AlertTriangle } from "lucide-react";
+import { Input } from "./ui/input";
+import { Disc3, AlertTriangle, Search } from "lucide-react";
 import { db, storage, isFirebaseConfigured } from "@/lib/firebase";
 import { collection, getDocs, addDoc, doc, updateDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -22,9 +23,16 @@ export function MusicPlayer() {
   const [volume, setVolume] = useState(0.8);
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
+
+  const filteredTracks = tracks.filter(
+    (track) =>
+      track.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (track.artist || "Unknown Artist").toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const currentTrack = currentTrackIndex !== null ? tracks[currentTrackIndex] : null;
 
@@ -81,7 +89,6 @@ export function MusicPlayer() {
         return;
     }
 
-    // When a user uploads for the first time after using mock data, clear the mock data.
     const isUsingMockData = tracks.some(track => mockTracks.some(mock => mock.id === track.id));
     if(isUsingMockData) {
       setTracks([]);
@@ -136,35 +143,46 @@ export function MusicPlayer() {
     }
   };
 
-  const playTrack = (index: number) => {
-    setCurrentTrackIndex(index);
-    setIsPlaying(true);
-  };
+  const playTrack = useCallback((index: number) => {
+    if (index >= 0 && index < filteredTracks.length) {
+      const trackToPlay = filteredTracks[index];
+      const originalIndex = tracks.findIndex((t) => t.id === trackToPlay.id);
+      if (originalIndex !== -1) {
+        setCurrentTrackIndex(originalIndex);
+        setIsPlaying(true);
+      }
+    }
+  }, [filteredTracks, tracks]);
 
   const togglePlay = () => {
-    if (currentTrackIndex === null && tracks.length > 0) {
-      setCurrentTrackIndex(0);
-      setIsPlaying(true);
+    if (currentTrackIndex === null && filteredTracks.length > 0) {
+      playTrack(0);
     } else {
       setIsPlaying(!isPlaying);
     }
   };
 
-  const playNext = useCallback(() => {
-    if (currentTrackIndex !== null) {
-      const nextIndex = (currentTrackIndex + 1) % tracks.length;
-      setCurrentTrackIndex(nextIndex);
-      setIsPlaying(true);
-    }
-  }, [currentTrackIndex, tracks.length]);
+  const playCycle = useCallback((direction: 'next' | 'prev') => {
+    if (filteredTracks.length === 0) return;
 
-  const playPrev = () => {
-    if (currentTrackIndex !== null) {
-      const prevIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
-      setCurrentTrackIndex(prevIndex);
-      setIsPlaying(true);
+    const currentFilteredIndex = currentTrack ? filteredTracks.findIndex((t) => t.id === currentTrack.id) : -1;
+    let nextFilteredIndex;
+
+    if (currentFilteredIndex === -1) {
+      nextFilteredIndex = 0;
+    } else {
+      const numTracks = filteredTracks.length;
+      if (direction === 'next') {
+        nextFilteredIndex = (currentFilteredIndex + 1) % numTracks;
+      } else {
+        nextFilteredIndex = (currentFilteredIndex - 1 + numTracks) % numTracks;
+      }
     }
-  };
+    playTrack(nextFilteredIndex);
+  }, [currentTrack, filteredTracks, playTrack]);
+
+  const playNext = useCallback(() => playCycle('next'), [playCycle]);
+  const playPrev = useCallback(() => playCycle('prev'), [playCycle]);
   
   const handleGenerateTitle = async (trackId: string) => {
     if (!isFirebaseConfigured || !db) {
@@ -179,7 +197,6 @@ export function MusicPlayer() {
     const trackIndex = tracks.findIndex(t => t.id === trackId);
     if (trackIndex === -1) return;
     
-    // Cannot generate title for mock tracks
     if (mockTracks.some(mock => mock.id === trackId)) {
        toast({
         variant: "destructive",
@@ -259,18 +276,6 @@ export function MusicPlayer() {
   };
 
   const renderPlaylistContent = () => {
-    if (!isFirebaseConfigured && tracks.length > 0) {
-      return (
-        <PlaylistView
-          tracks={tracks}
-          currentTrackId={currentTrack?.id}
-          isPlaying={isPlaying}
-          onPlayTrack={playTrack}
-          onGenerateTitle={handleGenerateTitle}
-        />
-      );
-    }
-    
     if (isFirebaseConfigured && isLoading) {
       return (
         <Card>
@@ -285,10 +290,10 @@ export function MusicPlayer() {
       );
     }
     
-    if (tracks.length > 0) {
+    if (filteredTracks.length > 0) {
       return (
        <PlaylistView
-         tracks={tracks}
+         tracks={filteredTracks}
          currentTrackId={currentTrack?.id}
          isPlaying={isPlaying}
          onPlayTrack={playTrack}
@@ -297,7 +302,6 @@ export function MusicPlayer() {
      );
     }
     
-    // This case will now be rare, only if cloud is configured but empty and mock data fails to load
     return (
      <Card className="bg-card border-dashed">
          <CardContent className="h-full flex flex-col items-center justify-center p-10 text-center">
@@ -322,6 +326,15 @@ export function MusicPlayer() {
           <FileUploader onFilesAdded={handleFilesAdded} />
         </div>
         <div className="lg:col-span-2">
+           <div className="relative mb-4">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                placeholder="Search for tracks..."
+                className="w-full pl-12"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
            {renderPlaylistContent()}
         </div>
       </div>
