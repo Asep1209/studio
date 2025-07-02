@@ -36,7 +36,7 @@ export const mockTracks: Track[] = [
     artist: 'Radiohead',
     album: 'OK COMPUTER',
     cover: '/cover/nospr.png', // Ganti dengan URL gambar album jika ada
-    url: '/music/Letdown.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    url: '/music/LetDown.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
     duration: 299, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
 
