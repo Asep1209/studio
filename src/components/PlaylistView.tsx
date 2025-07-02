@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 interface PlaylistViewProps {
   tracks: Track[];
-  currentTrackId?: string | null;
+  currentTrackId?: number | null;
   isPlaying: boolean;
   onPlayTrack: (index: number) => void;
 }

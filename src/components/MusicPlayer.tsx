@@ -10,9 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
 import { Input } from "./ui/input";
 import { Disc3, Search } from "lucide-react";
-import { db, storage, isFirebaseConfigured } from "@/lib/firebase";
-import { collection, getDocs, addDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { addTrack, getAllTracks } from "@/lib/local-db";
 
 export function MusicPlayer() {
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -23,6 +21,7 @@ export function MusicPlayer() {
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentBlobUrl, setCurrentBlobUrl] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
@@ -33,36 +32,20 @@ export function MusicPlayer() {
       (track.artist || "Unknown Artist").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const currentTrack = currentTrackIndex !== null ? tracks[currentTrackIndex] : null;
+  const currentTrack = currentTrackIndex !== null ? filteredTracks[currentTrackIndex] : null;
 
   useEffect(() => {
-    if (!isFirebaseConfigured) {
-      setTracks([]);
-      setIsLoading(false);
-      return;
-    }
-
     const fetchTracks = async () => {
       setIsLoading(true);
       try {
-        if (!db) {
-          throw new Error("Firestore not initialized");
-        }
-        const tracksCollection = collection(db, "tracks");
-        const q = query(tracksCollection, orderBy("createdAt", "desc"));
-        const querySnapshot = await getDocs(q);
-        const fetchedTracks = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Track[];
+        const fetchedTracks = await getAllTracks();
         setTracks(fetchedTracks);
       } catch (error) {
-        console.error("Error fetching tracks:", error);
-        setTracks([]);
+        console.error("Error fetching tracks from IndexedDB:", error);
         toast({
           variant: "destructive",
-          title: "Error fetching playlist",
-          description: "Could not load tracks from the cloud.",
+          title: "Error loading playlist",
+          description: "Could not load tracks from your browser's storage.",
         });
       } finally {
         setIsLoading(false);
@@ -70,80 +53,73 @@ export function MusicPlayer() {
     };
 
     fetchTracks();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [toast]);
+  
+  // Clean up blob URL on component unmount
+  useEffect(() => {
+    return () => {
+      if (currentBlobUrl) {
+        URL.revokeObjectURL(currentBlobUrl);
+      }
+    };
+  }, [currentBlobUrl]);
+
 
   const handleFilesAdded = async (files: File[]) => {
-    if (!isFirebaseConfigured || !storage || !db) {
-        toast({
-          variant: "destructive",
-          title: "Firebase Not Configured",
-          description: "Please provide valid Firebase credentials in .env to upload files.",
-        });
-        return;
-    }
-
+    setIsLoading(true);
+    let errorCount = 0;
     for (const file of files) {
-      toast({
-        title: "Uploading...",
-        description: `Your track "${file.name}" is being uploaded.`,
-      });
-
       try {
-        const storagePath = `music/${Date.now()}-${file.name}`;
-        const storageRef = ref(storage, storagePath);
-        await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(storageRef);
-
-        const trackData = {
-          title: file.name.split(".").slice(0, -1).join("."),
-          url: downloadURL,
-          storagePath,
-          fileName: file.name,
-          artist: "Unknown Artist",
-          createdAt: serverTimestamp(),
-        };
-        const docRef = await addDoc(collection(db, "tracks"), trackData);
-        
-        const newTrack: Track = {
-          id: docRef.id,
-          title: trackData.title,
-          url: trackData.url,
-          storagePath: trackData.storagePath,
-          fileName: trackData.fileName,
-          artist: trackData.artist,
-        };
-        
-        setTracks((prevTracks) => [newTrack, ...prevTracks]);
-        
-        toast({
-          title: "Upload Complete",
-          description: `"${newTrack.title}" has been added to your playlist.`,
-        });
-
+        await addTrack(file);
       } catch (error) {
+        errorCount++;
         console.error("Upload failed:", error);
-        toast({
-          variant: "destructive",
-          title: "Upload Failed",
-          description: `Could not upload "${file.name}".`,
-        });
       }
     }
+    
+    // Refetch all tracks to update the UI
+    try {
+        const fetchedTracks = await getAllTracks();
+        setTracks(fetchedTracks);
+    } catch (error) {
+        console.error("Error fetching tracks from IndexedDB:", error);
+    }
+
+
+    if (errorCount > 0) {
+       toast({
+          variant: "destructive",
+          title: "Some uploads failed",
+          description: `${errorCount} track(s) could not be saved to your browser storage.`,
+        });
+    } else {
+        toast({
+          title: "Upload Complete",
+          description: `${files.length} track(s) have been added to your local playlist.`,
+        });
+    }
+    setIsLoading(false);
   };
 
   const playTrack = useCallback((index: number) => {
     if (index >= 0 && index < filteredTracks.length) {
       const trackToPlay = filteredTracks[index];
-      const originalIndex = tracks.findIndex((t) => t.id === trackToPlay.id);
-      if (originalIndex !== -1) {
-        setCurrentTrackIndex(originalIndex);
-        setIsPlaying(true);
-        setDuration(0);
-        setProgress(0);
+      setCurrentTrackIndex(index); 
+      setIsPlaying(true);
+      setDuration(0);
+      setProgress(0);
+
+      if (currentBlobUrl) {
+        URL.revokeObjectURL(currentBlobUrl);
+      }
+      const newBlobUrl = URL.createObjectURL(trackToPlay.file);
+      setCurrentBlobUrl(newBlobUrl);
+      if (audioRef.current) {
+        audioRef.current.src = newBlobUrl;
+        audioRef.current.load();
       }
     }
-  }, [filteredTracks, tracks]);
+  }, [filteredTracks, currentBlobUrl]);
 
   const togglePlay = () => {
     if (currentTrackIndex === null && filteredTracks.length > 0) {
@@ -156,21 +132,19 @@ export function MusicPlayer() {
   const playCycle = useCallback((direction: 'next' | 'prev') => {
     if (filteredTracks.length === 0) return;
 
-    const currentFilteredIndex = currentTrack ? filteredTracks.findIndex((t) => t.id === currentTrack.id) : -1;
     let nextFilteredIndex;
-
-    if (currentFilteredIndex === -1) {
+    if (currentTrackIndex === null) {
       nextFilteredIndex = 0;
     } else {
       const numTracks = filteredTracks.length;
       if (direction === 'next') {
-        nextFilteredIndex = (currentFilteredIndex + 1) % numTracks;
+        nextFilteredIndex = (currentTrackIndex + 1) % numTracks;
       } else {
-        nextFilteredIndex = (currentFilteredIndex - 1 + numTracks) % numTracks;
+        nextFilteredIndex = (currentTrackIndex - 1 + numTracks) % numTracks;
       }
     }
     playTrack(nextFilteredIndex);
-  }, [currentTrack, filteredTracks, playTrack]);
+  }, [currentTrackIndex, filteredTracks, playTrack]);
 
   const playNext = useCallback(() => playCycle('next'), [playCycle]);
   const playPrev = useCallback(() => playCycle('prev'), [playCycle]);
@@ -178,23 +152,14 @@ export function MusicPlayer() {
   useEffect(() => {
     if (audioRef.current) {
       if (isPlaying) {
-        audioRef.current.play().catch(e => console.error("Playback error:", e));
+        audioRef.current.play().catch(e => { 
+          console.error("Playback error:", e);
+        });
       } else {
         audioRef.current.pause();
       }
     }
   }, [isPlaying, currentTrackIndex]);
-
-  useEffect(() => {
-    if (audioRef.current && currentTrack) {
-      audioRef.current.src = currentTrack.url;
-      setProgress(0);
-      setDuration(0);
-      if (isPlaying) {
-         audioRef.current.play().catch(e => console.error("Playback error:", e));
-      }
-    }
-  }, [currentTrack, isPlaying]);
   
   useEffect(() => {
     if (audioRef.current) {
@@ -203,7 +168,7 @@ export function MusicPlayer() {
   }, [volume]);
 
   const handleTimeUpdate = () => {
-    if (audioRef.current && audioRef.current.duration) {
+    if (audioRef.current && audioRef.current.duration && isFinite(audioRef.current.duration)) {
       const newProgress = (audioRef.current.currentTime / audioRef.current.duration) * 100;
       setProgress(newProgress);
     }
@@ -217,9 +182,11 @@ export function MusicPlayer() {
 
   const handleSeek = (value: number) => {
     if (audioRef.current && currentTrack) {
-      const newTime = (value / 100) * audioRef.current.duration;
-      audioRef.current.currentTime = newTime;
-      setProgress(value);
+      const newTime = (value / 100) * duration;
+      if (isFinite(newTime)) {
+          audioRef.current.currentTime = newTime;
+          setProgress(value);
+      }
     }
   };
 
