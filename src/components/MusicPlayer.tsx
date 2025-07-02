@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { Track } from "@/lib/types";
@@ -228,6 +227,65 @@ export function MusicPlayer() {
     }
   };
 
+  const renderPlaylistContent = () => {
+    if (!isFirebaseConfigured) {
+      return (
+        <Card>
+           <CardHeader>
+             <CardTitle className="flex items-center gap-2 text-destructive">
+               <AlertTriangle />
+               Firebase Not Configured
+             </CardTitle>
+           </CardHeader>
+           <CardContent>
+             <p>
+               Cloud features are disabled. Please provide your Firebase project configuration in the <code className="bg-muted px-1 py-0.5 rounded-sm font-mono text-sm">.env</code> file.
+             </p>
+             <p className="mt-2 text-sm text-muted-foreground">
+               After updating the <code className="bg-muted px-1 py-0.5 rounded-sm font-mono text-sm">.env</code> file, you will need to restart the development server.
+             </p>
+           </CardContent>
+         </Card>
+      );
+    }
+
+    if (isLoading) {
+      return (
+        <Card>
+           <CardHeader><CardTitle>My Playlist</CardTitle></CardHeader>
+           <CardContent className="h-[400px] space-y-4 pt-2 pr-4">
+             <Skeleton className="h-12 w-full" />
+             <Skeleton className="h-12 w-full" />
+             <Skeleton className="h-12 w-full" />
+             <Skeleton className="h-12 w-full" />
+           </CardContent>
+        </Card>
+      );
+    }
+    
+    if (tracks.length > 0) {
+      return (
+       <PlaylistView
+         tracks={tracks}
+         currentTrackId={currentTrack?.id}
+         isPlaying={isPlaying}
+         onPlayTrack={playTrack}
+         onGenerateTitle={handleGenerateTitle}
+       />
+     );
+    }
+    
+    return (
+     <Card className="bg-card border-dashed">
+         <CardContent className="h-full flex flex-col items-center justify-center p-10 text-center">
+             <Disc3 className="w-16 h-16 text-muted-foreground/50 mb-4 animate-spin [animation-duration:3s]" />
+             <h3 className="text-xl font-semibold">Your playlist is empty</h3>
+             <p className="text-muted-foreground mt-1">Upload some music to get started.</p>
+         </CardContent>
+     </Card>
+   );
+ };
+
   return (
     <div className="relative pb-32">
        <audio
@@ -241,50 +299,7 @@ export function MusicPlayer() {
           <FileUploader onFilesAdded={handleFilesAdded} />
         </div>
         <div className="lg:col-span-2">
-           {!isFirebaseConfigured ? (
-             <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-destructive">
-                    <AlertTriangle />
-                    Firebase Not Configured
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>
-                    Cloud features are disabled. Please provide your Firebase project configuration in the <code className="bg-muted px-1 py-0.5 rounded-sm font-mono text-sm">.env</code> file.
-                  </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    After updating the <code className="bg-muted px-1 py-0.5 rounded-sm font-mono text-sm">.env</code> file, you will need to restart the development server.
-                  </p>
-                </CardContent>
-              </Card>
-           ) : isLoading ? (
-             <Card>
-                <CardHeader><CardTitle>My Playlist</CardTitle></Header>
-                <CardContent className="h-[400px] space-y-4 pt-2 pr-4">
-                  <Skeleton className="h-12 w-full" />
-                  <Skeleton className="h-12 w-full" />
-                  <Skeleton className="h-12 w-full" />
-                  <Skeleton className="h-12 w-full" />
-                </CardContent>
-             </Card>
-           ) : tracks.length > 0 ? (
-            <PlaylistView
-              tracks={tracks}
-              currentTrackId={currentTrack?.id}
-              isPlaying={isPlaying}
-              onPlayTrack={playTrack}
-              onGenerateTitle={handleGenerateTitle}
-            />
-          ) : (
-            <Card className="bg-card border-dashed">
-                <CardContent className="h-full flex flex-col items-center justify-center p-10 text-center">
-                    <Disc3 className="w-16 h-16 text-muted-foreground/50 mb-4 animate-spin [animation-duration:3s]" />
-                    <h3 className="text-xl font-semibold">Your playlist is empty</h3>
-                    <p className="text-muted-foreground mt-1">Upload some music to get started.</p>
-                </CardContent>
-            </Card>
-          )}
+           {renderPlaylistContent()}
         </div>
       </div>
      
