@@ -1,25 +1,10 @@
-import { MusicPlayer } from "@/components/MusicPlayer";
-import { Music } from "lucide-react";
-
 export default function Home() {
   return (
-    <main className="bg-background text-foreground min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <header className="flex items-center gap-4 mb-8">
-           <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
-            <Music className="w-8 h-8 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold font-headline text-foreground">
-              Your Music Library
-            </h1>
-            <p className="text-muted-foreground">
-              Discover your next favorite track.
-            </p>
-          </div>
-        </header>
-        <MusicPlayer />
-      </div>
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <h1 className="text-4xl font-bold">Aplikasi Musik</h1>
+      <p className="mt-2 text-lg text-muted-foreground">
+        Tes deploy. Kalo halaman ini muncul, berarti kita bisa lanjut.
+      </p>
     </main>
   );
 }
