@@ -5,14 +5,13 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { FileUploader } from "./FileUploader";
 import { PlaylistView } from "./PlaylistView";
 import { PlayerControls } from "./PlayerControls";
-import { generateTitleAction } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
 import { Input } from "./ui/input";
-import { Disc3, AlertTriangle, Search } from "lucide-react";
+import { Disc3, Search } from "lucide-react";
 import { db, storage, isFirebaseConfigured } from "@/lib/firebase";
-import { collection, getDocs, addDoc, doc, updateDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
+import { collection, getDocs, addDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { mockTracks } from "@/lib/mock-data";
 
@@ -183,56 +182,6 @@ export function MusicPlayer() {
 
   const playNext = useCallback(() => playCycle('next'), [playCycle]);
   const playPrev = useCallback(() => playCycle('prev'), [playCycle]);
-  
-  const handleGenerateTitle = async (trackId: string) => {
-    if (!isFirebaseConfigured || !db) {
-      toast({
-        variant: "destructive",
-        title: "Firebase Not Configured",
-        description: "Cannot generate title without Firebase configuration.",
-      });
-      return;
-    }
-    
-    const trackIndex = tracks.findIndex(t => t.id === trackId);
-    if (trackIndex === -1) return;
-    
-    if (mockTracks.some(mock => mock.id === trackId)) {
-       toast({
-        variant: "destructive",
-        title: "Cannot Generate Title",
-        description: "This is a local track. Please upload it to the cloud first.",
-      });
-      return;
-    }
-
-    const trackToUpdate = tracks[trackIndex];
-    const originalTitle = trackToUpdate.title;
-    
-    setTracks(prev => prev.map(t => t.id === trackId ? { ...t, title: "Generating..." } : t));
-
-    try {
-      const newTitle = await generateTitleAction({ fileName: trackToUpdate.fileName });
-      
-      const trackRef = doc(db, "tracks", trackId);
-      await updateDoc(trackRef, { title: newTitle });
-
-      setTracks(prev => prev.map(t => t.id === trackId ? { ...t, title: newTitle } : t));
-      
-      toast({
-        title: "Title Generated",
-        description: `New title is "${newTitle}".`,
-      });
-    } catch (error) {
-      console.error("Failed to generate title:", error);
-      setTracks(prev => prev.map(t => t.id === trackId ? { ...t, title: originalTitle } : t));
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Could not generate a new title.",
-      });
-    }
-  };
 
   useEffect(() => {
     if (audioRef.current) {
@@ -276,7 +225,7 @@ export function MusicPlayer() {
   };
 
   const renderPlaylistContent = () => {
-    if (isFirebaseConfigured && isLoading) {
+    if (isLoading) {
       return (
         <Card>
            <CardHeader><CardTitle>My Playlist</CardTitle></CardHeader>
@@ -297,7 +246,6 @@ export function MusicPlayer() {
          currentTrackId={currentTrack?.id}
          isPlaying={isPlaying}
          onPlayTrack={playTrack}
-         onGenerateTitle={handleGenerateTitle}
        />
      );
     }

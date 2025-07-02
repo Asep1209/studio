@@ -3,7 +3,7 @@
 import type { Track } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { Music, Play, Pause, Wand2 } from "lucide-react";
+import { Music, Play, Pause } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import { cn } from "@/lib/utils";
 
@@ -12,10 +12,9 @@ interface PlaylistViewProps {
   currentTrackId?: string | null;
   isPlaying: boolean;
   onPlayTrack: (index: number) => void;
-  onGenerateTitle: (trackId: string) => void;
 }
 
-export function PlaylistView({ tracks, currentTrackId, isPlaying, onPlayTrack, onGenerateTitle }: PlaylistViewProps) {
+export function PlaylistView({ tracks, currentTrackId, isPlaying, onPlayTrack }: PlaylistViewProps) {
   return (
     <Card className="h-full">
       <CardHeader>
@@ -26,7 +25,6 @@ export function PlaylistView({ tracks, currentTrackId, isPlaying, onPlayTrack, o
           <div className="flex flex-col gap-2">
             {tracks.map((track, index) => {
               const isActive = track.id === currentTrackId;
-              const isGenerating = track.title === "Generating...";
               return (
                 <div
                   key={track.id}
@@ -51,15 +49,6 @@ export function PlaylistView({ tracks, currentTrackId, isPlaying, onPlayTrack, o
                     </p>
                     <p className="text-sm text-muted-foreground truncate">{track.artist || "Unknown Artist"}</p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onGenerateTitle(track.id)}
-                    disabled={isGenerating}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Wand2 className={cn("w-5 h-5", isGenerating && "animate-pulse")} />
-                  </Button>
                 </div>
               );
             })}
