@@ -1,8 +1,9 @@
 export interface Track {
   id: string;
-  file: File;
   title: string;
   artist?: string;
   album?: string;
-  url: string;
+  url: string; // The https download URL from Firebase Storage
+  storagePath: string; // The path to the file in Firebase Storage
+  fileName: string; // Original file name
 }

@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Track } from "@/lib/types";
@@ -7,8 +8,12 @@ import { PlaylistView } from "./PlaylistView";
 import { PlayerControls } from "./PlayerControls";
 import { generateTitleAction } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent } from "./ui/card";
-import { Disc3 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Skeleton } from "./ui/skeleton";
+import { Disc3, AlertTriangle } from "lucide-react";
+import { db, storage, isFirebaseConfigured } from "@/lib/firebase";
+import { collection, getDocs, addDoc, doc, updateDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export function MusicPlayer() {
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -16,20 +21,102 @@ export function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [progress, setProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
 
   const currentTrack = currentTrackIndex !== null ? tracks[currentTrackIndex] : null;
 
-  const handleFilesAdded = (files: File[]) => {
-    const newTracks: Track[] = files.map((file) => ({
-      id: crypto.randomUUID(),
-      file,
-      title: file.name.split(".").slice(0, -1).join("."),
-      url: URL.createObjectURL(file),
-    }));
-    setTracks((prevTracks) => [...prevTracks, ...newTracks]);
+  useEffect(() => {
+    if (!isFirebaseConfigured) {
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchTracks = async () => {
+      setIsLoading(true);
+      try {
+        if (!db) return;
+        const tracksCollection = collection(db, "tracks");
+        const q = query(tracksCollection, orderBy("createdAt"));
+        const querySnapshot = await getDocs(q);
+        const fetchedTracks = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Track[];
+        setTracks(fetchedTracks);
+      } catch (error) {
+        console.error("Error fetching tracks:", error);
+        toast({
+          variant: "destructive",
+          title: "Error fetching playlist",
+          description: "Could not load tracks from the cloud.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTracks();
+  }, [toast]);
+
+  const handleFilesAdded = async (files: File[]) => {
+    if (!isFirebaseConfigured || !storage || !db) {
+        toast({
+          variant: "destructive",
+          title: "Firebase Not Configured",
+          description: "Please provide valid Firebase credentials in .env to upload files.",
+        });
+        return;
+    }
+
+    for (const file of files) {
+      toast({
+        title: "Uploading...",
+        description: `Your track "${file.name}" is being uploaded.`,
+      });
+
+      try {
+        const storagePath = `music/${Date.now()}-${file.name}`;
+        const storageRef = ref(storage, storagePath);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+
+        const trackData = {
+          title: file.name.split(".").slice(0, -1).join("."),
+          url: downloadURL,
+          storagePath,
+          fileName: file.name,
+          artist: "Unknown Artist",
+          createdAt: serverTimestamp(),
+        };
+        const docRef = await addDoc(collection(db, "tracks"), trackData);
+        
+        const newTrack: Track = {
+          id: docRef.id,
+          title: trackData.title,
+          url: trackData.url,
+          storagePath: trackData.storagePath,
+          fileName: trackData.fileName,
+          artist: trackData.artist,
+        };
+        setTracks((prevTracks) => [...prevTracks, newTrack]);
+        
+        toast({
+          title: "Upload Complete",
+          description: `"${newTrack.title}" has been added to your playlist.`,
+        });
+
+      } catch (error) {
+        console.error("Upload failed:", error);
+        toast({
+          variant: "destructive",
+          title: "Upload Failed",
+          description: `Could not upload "${file.name}".`,
+        });
+      }
+    }
   };
 
   const playTrack = (index: number) => {
@@ -63,24 +150,37 @@ export function MusicPlayer() {
   };
   
   const handleGenerateTitle = async (trackId: string) => {
+    if (!isFirebaseConfigured || !db) {
+      toast({
+        variant: "destructive",
+        title: "Firebase Not Configured",
+        description: "Cannot generate title without Firebase configuration.",
+      });
+      return;
+    }
+    
     const trackIndex = tracks.findIndex(t => t.id === trackId);
     if (trackIndex === -1) return;
 
-    const originalTitle = tracks[trackIndex].title;
+    const trackToUpdate = tracks[trackIndex];
+    const originalTitle = trackToUpdate.title;
     
-    // Optimistic update
     setTracks(prev => prev.map(t => t.id === trackId ? { ...t, title: "Generating..." } : t));
 
     try {
-      const newTitle = await generateTitleAction({ fileName: tracks[trackIndex].file.name });
+      const newTitle = await generateTitleAction({ fileName: trackToUpdate.fileName });
+      
+      const trackRef = doc(db, "tracks", trackId);
+      await updateDoc(trackRef, { title: newTitle });
+
       setTracks(prev => prev.map(t => t.id === trackId ? { ...t, title: newTitle } : t));
+      
       toast({
         title: "Title Generated",
         description: `New title is "${newTitle}".`,
       });
     } catch (error) {
       console.error("Failed to generate title:", error);
-      // Revert on error
       setTracks(prev => prev.map(t => t.id === trackId ? { ...t, title: originalTitle } : t));
       toast({
         variant: "destructive",
@@ -89,7 +189,6 @@ export function MusicPlayer() {
       });
     }
   };
-
 
   useEffect(() => {
     if (audioRef.current) {
@@ -142,7 +241,34 @@ export function MusicPlayer() {
           <FileUploader onFilesAdded={handleFilesAdded} />
         </div>
         <div className="lg:col-span-2">
-           {tracks.length > 0 ? (
+           {!isFirebaseConfigured ? (
+             <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-destructive">
+                    <AlertTriangle />
+                    Firebase Not Configured
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>
+                    Cloud features are disabled. Please provide your Firebase project configuration in the <code className="bg-muted px-1 py-0.5 rounded-sm font-mono text-sm">.env</code> file.
+                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    After updating the <code className="bg-muted px-1 py-0.5 rounded-sm font-mono text-sm">.env</code> file, you will need to restart the development server.
+                  </p>
+                </CardContent>
+              </Card>
+           ) : isLoading ? (
+             <Card>
+                <CardHeader><CardTitle>My Playlist</CardTitle></Header>
+                <CardContent className="h-[400px] space-y-4 pt-2 pr-4">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </CardContent>
+             </Card>
+           ) : tracks.length > 0 ? (
             <PlaylistView
               tracks={tracks}
               currentTrackId={currentTrack?.id}
