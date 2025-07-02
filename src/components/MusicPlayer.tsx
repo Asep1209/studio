@@ -21,6 +21,7 @@ export function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -149,6 +150,8 @@ export function MusicPlayer() {
       if (originalIndex !== -1) {
         setCurrentTrackIndex(originalIndex);
         setIsPlaying(true);
+        setDuration(0);
+        setProgress(0);
       }
     }
   }, [filteredTracks, tracks]);
@@ -197,6 +200,7 @@ export function MusicPlayer() {
     if (audioRef.current && currentTrack) {
       audioRef.current.src = currentTrack.url;
       setProgress(0);
+      setDuration(0);
       if (isPlaying) {
          audioRef.current.play().catch(e => console.error("Playback error:", e));
       }
@@ -210,11 +214,17 @@ export function MusicPlayer() {
   }, [volume]);
 
   const handleTimeUpdate = () => {
-    if (audioRef.current) {
+    if (audioRef.current && audioRef.current.duration) {
       const newProgress = (audioRef.current.currentTime / audioRef.current.duration) * 100;
       setProgress(newProgress);
     }
   };
+
+  const handleMetadataLoaded = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  }
 
   const handleSeek = (value: number) => {
     if (audioRef.current && currentTrack) {
@@ -267,7 +277,7 @@ export function MusicPlayer() {
         ref={audioRef}
         onTimeUpdate={handleTimeUpdate}
         onEnded={playNext}
-        onLoadedMetadata={handleTimeUpdate}
+        onLoadedMetadata={handleMetadataLoaded}
       />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1">
@@ -292,6 +302,7 @@ export function MusicPlayer() {
           track={currentTrack}
           isPlaying={isPlaying}
           progress={progress}
+          duration={duration}
           volume={volume}
           onTogglePlay={togglePlay}
           onNext={playNext}

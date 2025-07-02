@@ -10,6 +10,7 @@ interface PlayerControlsProps {
   track: Track | null;
   isPlaying: boolean;
   progress: number;
+  duration: number;
   volume: number;
   onTogglePlay: () => void;
   onNext: () => void;
@@ -22,6 +23,7 @@ export function PlayerControls({
   track,
   isPlaying,
   progress,
+  duration,
   volume,
   onTogglePlay,
   onNext,
@@ -31,14 +33,12 @@ export function PlayerControls({
 }: PlayerControlsProps) {
 
   const formatTime = (seconds: number) => {
-    if (isNaN(seconds)) return "0:00";
+    if (isNaN(seconds) || !isFinite(seconds)) return "0:00";
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
   
-  // This is a placeholder as we don't have audio duration yet
-  const duration = 200; // Mock duration
   const currentTime = (progress / 100) * duration;
 
   return (
