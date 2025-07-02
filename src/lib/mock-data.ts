@@ -21,66 +21,69 @@ export const mockTracks: Track[] = [
 
   {
     id: 1, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
-    title: 'No Surprises',
-    artist: 'Radiohead',
-    album: 'OK COMPUTER',
-    cover: '/cover/nospr.png', // Ganti dengan URL gambar album jika ada
-    url: '/music/No Surprises.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
-    duration: 228, // <-- GANTI DURASI (detik, kira-kira juga boleh)
+    title: 'Dancing Queen',
+    artist: 'ABBA',
+    album: 'Arrival',
+    cover: '/cover/abba.png', // Ganti dengan URL gambar album jika ada
+    url: '/music/Dancing Queen.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    duration: 230, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
 
 
   {
     id: 2, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
-    title: 'Let Down',
-    artist: 'Radiohead',
-    album: 'OK COMPUTER',
-    cover: '/cover/nospr.png', // Ganti dengan URL gambar album jika ada
-    url: '/music/LetDown.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
-    duration: 299, // <-- GANTI DURASI (detik, kira-kira juga boleh)
+    title: 'Only You',
+    artist: 'The Platters',
+    album: 'Only You',
+    cover: '/cover/only you.png', // Ganti dengan URL gambar album jika ada
+    url: '/music/Only You.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    duration: 159, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
 
 
 
   {
     id: 3, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
-    title: 'Aku Milikmu',
-    artist: 'Dewa 19',
-    album: 'Format Masa Depan',
-    cover: '/cover/Format.jpg', // Ganti dengan URL gambar album jika ada
-    url: '/music/Aku milikmu.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
-    duration: 332, // <-- GANTI DURASI (detik, kira-kira juga boleh)
+    title: 'No 1. Party Anthem',
+    artist: 'Arctic Monkeys',
+    album: 'AM',
+    cover: '/cover/AM.png', // Ganti dengan URL gambar album jika ada
+    url: '/music/NUMEROUNO.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    duration: 243, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
 
   {
     id: 4, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
-    title: 'Masihkah Ada',
-    artist: 'Dewa 19',
-    album: 'Format Masa Depan',
-    cover: '/cover/Format.jpg', // Ganti dengan URL gambar album jika ada
-    url: '/music/Masihkah ada.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
-    duration: 227, // <-- GANTI DURASI (detik, kira-kira juga boleh)
+    title: 'Do I Wanna Know?',
+    artist: 'Arctic Monkeys',
+    album: 'AM',
+    cover: '/cover/AM.png', // Ganti dengan URL gambar album jika ada
+    url: '/music/DOIWK.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    duration: 271, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
 
   {
     id: 5, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
-    title: 'Still Im Sure We Love Again',
-    artist: 'Dewa 19',
-    album: 'Format Masa Depan',
-    cover: '/cover/Format.jpg', // Ganti dengan URL gambar album jika ada
-    url: '/music/Still im.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
-    duration: 236, // <-- GANTI DURASI (detik, kira-kira juga boleh)
+    title: 'Piano Man',
+    artist: 'Billy Joel',
+    album: 'Piano Man',
+    cover: '/cover/billy.png', // Ganti dengan URL gambar album jika ada
+    url: '/music/Piano Man.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    duration: 338, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
 
   {
     id: 6, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
-    title: 'Takkan Ada Cinta yang Lain',
-    artist: 'Dewa 19',
-    album: 'Format Masa Depan',
-    cover: '/cover/Format.jpg', // Ganti dengan URL gambar album jika ada
-    url: '/music/Takkan ada.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
-    duration: 269, // <-- GANTI DURASI (detik, kira-kira juga boleh)
+    title: 'Uptown Girl',
+    artist: 'Billy Joel',
+    album: 'Piano Man',
+    cover: '/cover/billy.png', // Ganti dengan URL gambar album jika ada
+    url: '/music/Uptown Girl.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    duration: 196, // <-- GANTI DURASI (detik, kira-kira juga boleh)
   },
+
+
+
   /*
   {
     id: 1, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
