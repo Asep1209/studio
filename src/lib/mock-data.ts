@@ -16,6 +16,71 @@ export const mockTracks: Track[] = [
   // Copy-paste blok di bawah ini untuk setiap lagu yang Anda punya.
   // Jangan lupa hapus tanda comment (/* dan */) nya.
 
+
+
+
+  {
+    id: 1, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
+    title: 'No Surprises',
+    artist: 'Radiohead',
+    album: 'OK COMPUTER',
+    cover: '/Cover/nospr.png', // Ganti dengan URL gambar album jika ada
+    url: '/music/No Surprises.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    duration: 228, // <-- GANTI DURASI (detik, kira-kira juga boleh)
+  },
+
+
+  {
+    id: 2, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
+    title: 'Let Down',
+    artist: 'Radiohead',
+    album: 'OK COMPUTER',
+    cover: '/Cover/nospr.png', // Ganti dengan URL gambar album jika ada
+    url: '/music/Letdown.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    duration: 299, // <-- GANTI DURASI (detik, kira-kira juga boleh)
+  },
+
+
+
+  {
+    id: 3, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
+    title: 'Aku Milikmu',
+    artist: 'Dewa 19',
+    album: 'Format Masa Depan',
+    cover: '/Cover/Format.jpg', // Ganti dengan URL gambar album jika ada
+    url: '/music/Aku milikmu.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    duration: 332, // <-- GANTI DURASI (detik, kira-kira juga boleh)
+  },
+
+  {
+    id: 4, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
+    title: 'Masihkah Ada',
+    artist: 'Dewa 19',
+    album: 'Format Masa Depan',
+    cover: '/Cover/Format.jpg', // Ganti dengan URL gambar album jika ada
+    url: '/music/Masihkah ada.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    duration: 227, // <-- GANTI DURASI (detik, kira-kira juga boleh)
+  },
+
+  {
+    id: 5, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
+    title: 'Still Im Sure We Love Again',
+    artist: 'Dewa 19',
+    album: 'Format Masa Depan',
+    cover: '/Cover/Format.jpg', // Ganti dengan URL gambar album jika ada
+    url: '/music/Still im.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    duration: 236, // <-- GANTI DURASI (detik, kira-kira juga boleh)
+  },
+
+  {
+    id: 6, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
+    title: 'Takkan Ada Cinta yang Lain',
+    artist: 'Dewa 19',
+    album: 'Format Masa Depan',
+    cover: '/Cover/Format.jpg', // Ganti dengan URL gambar album jika ada
+    url: '/music/Takkan ada.flac', // <-- GANTI NAMA FILE (HARUS SAMA DENGAN DI FOLDER public/music)
+    duration: 269, // <-- GANTI DURASI (detik, kira-kira juga boleh)
+  },
   /*
   {
     id: 1, // <-- GANTI NOMOR ID (mulai dari 1, 2, 3, dst.)
