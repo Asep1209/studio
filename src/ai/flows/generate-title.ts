@@ -1,47 +1,46 @@
-import { ai } from '../genkit';
-import * as z from 'zod';
+'use server';
+/**
+ * @fileOverview A flow for generating a creative title for a music track.
+ *
+ * - generateTitle - A function that handles the title generation process.
+ * - GenerateTitleInput - The input type for the generateTitle function.
+ * - GenerateTitleOutput - The return type for the generateTitle function.
+ */
 
-// This is a mock flow. In a real application, you would implement
-// the logic to analyze the audio and generate a title.
-export const generateTitleFlow = ai.defineFlow(
+import {ai} from '@/ai/genkit';
+import {z} from 'zod';
+
+const GenerateTitleInputSchema = z.object({
+  fileName: z.string().describe('The original filename of the music track.'),
+});
+export type GenerateTitleInput = z.infer<typeof GenerateTitleInputSchema>;
+
+export type GenerateTitleOutput = string;
+
+export async function generateTitle(input: GenerateTitleInput): Promise<GenerateTitleOutput> {
+  return generateTitleFlow(input);
+}
+
+const generateTitlePrompt = ai.definePrompt({
+  name: 'generateTitlePrompt',
+  input: { schema: GenerateTitleInputSchema },
+  output: { schema: z.string() },
+  prompt: `You are a creative director for a record label.
+  Based on the provided filename, generate a cool, interesting, and catchy title for this music track.
+  The title should be imaginative and suitable for a modern audience.
+  Just return the title itself, without any extra words like "Title:" or quotation marks.
+
+  Filename: {{{fileName}}}`,
+});
+
+const generateTitleFlow = ai.defineFlow(
   {
     name: 'generateTitleFlow',
-    inputSchema: z.object({ fileName: z.string() }),
+    inputSchema: GenerateTitleInputSchema,
     outputSchema: z.string(),
   },
-  async ({ fileName }) => {
-    // Simulate AI processing time.
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // Remove file extension and clean up the name for a better "mock" generation.
-    const baseName = fileName.split('.').slice(0, -1).join('.')
-      .replace(/_/g, ' ')
-      .replace(/-/g, ' ');
-
-    // Simple heuristic for a mock title. In a real scenario, an LLM would be prompted.
-    const adjectives = ['Cosmic', 'Midnight', 'Electric', 'Lost', 'Golden', 'Silent', 'Forgotten', 'Crystal'];
-    const nouns = ['Journey', 'Dream', 'Echoes', 'Vibes', 'Odyssey', 'Serenade', 'Rhapsody', 'Waves'];
-    
-    // Use a simple hashing function on filename to make the random choice deterministic for the same file.
-    let hash = 0;
-    for (let i = 0; i < baseName.length; i++) {
-        const char = baseName.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    
-    const randomAdjective = adjectives[Math.abs(hash) % adjectives.length];
-    const randomNoun = nouns[Math.abs(hash) % nouns.length];
-
-    // Capitalize first letters
-    const formattedBaseName = baseName
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-
-    if (Math.random() > 0.66) {
-        return `${randomAdjective} ${randomNoun}`;
-    }
-    return `AI: ${formattedBaseName}`;
+  async (input) => {
+    const { output } = await generateTitlePrompt(input);
+    return output!;
   }
 );
